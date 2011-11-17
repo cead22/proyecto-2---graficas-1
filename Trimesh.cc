@@ -29,38 +29,39 @@ int current_mesh = -1;
 
 bool draw_edges = false;
 bool draw_2side = false;
-bool draw_shiny = true;
+bool draw_shiny = false;
 bool draw_lit = true;
 bool draw_falsecolor = false;
 bool draw_index = false;
 bool white_bg = false;
 
 
+
 // Signal a redraw
-void need_redraw()
-{
-        glutPostRedisplay();
-}
+// void need_redraw()
+// {
+//         glutPostRedisplay();
+// }
 
 
 // Clear the screen
-void cls()
-{
-        glDisable(GL_DITHER);
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_NORMALIZE);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_NORMALIZE);
-        glDisable(GL_COLOR_MATERIAL);
-        /*if (white_bg)
-                glClearColor(1, 1, 1, 0);
-        else
-                glClearColor(0.08, 0.08, 0.08, 0);*/
-        //glClearDepth(1);
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-}
+// void cls()
+// {
+//         glDisable(GL_DITHER);
+//         glDisable(GL_BLEND);
+//         glDisable(GL_DEPTH_TEST);
+//         glDisable(GL_NORMALIZE);
+//         glDisable(GL_LIGHTING);
+//         glDisable(GL_NORMALIZE);
+//         glDisable(GL_COLOR_MATERIAL);
+//         /*if (white_bg)
+//                 glClearColor(1, 1, 1, 0);
+//         else
+//                 glClearColor(0.08, 0.08, 0.08, 0);*/
+//         //glClearDepth(1);
+//         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+// 
+// }
 
 
 // Set up lights and materials
@@ -258,31 +259,31 @@ void update_bsph()
 
 
 // Set the view...
-void resetview()
-{
-        printf("VIEW\n");
-        //camera.stopspin();
-        for (int i = 0; i < (int)meshes.size(); i++)
-                if (!xforms[i].read(xffilenames[i]))
-                        xforms[i] = xform();
+// void resetview()
+// {
+//         printf("VIEW\n");
+//         //camera.stopspin();
+//         for (int i = 0; i < (int)meshes.size(); i++)
+//                 if (!xforms[i].read(xffilenames[i]))
+//                         xforms[i] = xform();
+// 
+//         update_bsph();
+//         global_xf = xform::trans(0, 0, -5.0f * global_bsph.r) *
+//                     xform::trans(-global_bsph.center);
+// 
+//         // Special case for 1 mesh
+//         if (meshes.size() == 1 && xforms[0].read(xffilenames[0])) {
+//                 global_xf = xforms[0];
+//                 xforms[0] = xform();
+//                 update_bsph();
+//         }
+// }
 
-        update_bsph();
-        global_xf = xform::trans(0, 0, -5.0f * global_bsph.r) *
-                    xform::trans(-global_bsph.center);
-
-        // Special case for 1 mesh
-        if (meshes.size() == 1 && xforms[0].read(xffilenames[0])) {
-                global_xf = xforms[0];
-                xforms[0] = xform();
-                update_bsph();
-        }
-}
-
-void usage(const char *myname)
-{
-        fprintf(stderr, "Usage: %s infile...\n", myname);
-        exit(1);
-}
+// void usage(const char *myname)
+// {
+//         fprintf(stderr, "Usage: %s infile...\n", myname);
+//         exit(1);
+// }
 
 /////////////////////////
 // FIN DE TRIMESH
