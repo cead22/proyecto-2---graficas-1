@@ -29,8 +29,8 @@ static int previous_time;
 static int timer = 1;
 
 // ball
-static float ball_x = 80.0;
-static float ball_y = 80.0;
+static float ball_x = 20.0;
+static float ball_y = 0.0;
 // static float ball_z = 0.0;
 
 static float ball_speed_x = 15*0.0;
@@ -76,10 +76,10 @@ void importTrimesh(){
         }
 }
 
-void draw_floor () {
+void draw_game_area () {
 	glPushMatrix();
 		glTranslatef(-50.0f,-50.0f,	50.0f);
-		glColor3f(1,1,1);
+		glColor3f(.1,.1,.1);
 		glLineWidth(3.0);
 		glBegin(GL_LINE_LOOP);
 			glVertex3f(0.0,0.0,0.0);
@@ -87,12 +87,35 @@ void draw_floor () {
 			glVertex3f(100.0,0.0,-100.0);
 			glVertex3f(100.0,0.0,0.0);
 		glEnd();
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(100.0,0.0,0.0);
+			glVertex3f(100.0,0.0,-100.0);
+			glVertex3f(0.0,0.0,-100.0);
+			glVertex3f(0.0,0.0,0.0);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(0.0,0.0,0.0);
+			glVertex3f(0.0,2.0,0.0);
+			glVertex3f(100.0,2.0,0.0);
+			glVertex3f(100.0,0.0,0.0);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(0.0,0.0,-100.0);
+			glVertex3f(0.0,2.0,-100.0);
+			glVertex3f(100.0,2.0,-100.0);
+			glVertex3f(100.0,0.0,-100.0);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+			glVertex3f(100.0,0.0,0.0);
+			glVertex3f(100.0,2.0,0.0);
+			glVertex3f(100.0,2.0,-100.0);
+			glVertex3f(100.0,0.0,-100.0);
+		glEnd();
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(-50.0f,-50.0f,	50.0f);
-	// glColor3f(0.0,0.0,1.0);
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glColor3f(0.7,0.7,0.7);
 	glBegin(GL_POLYGON);
 		glVertex3f(100.0,0.0,0.0);
 		glVertex3f(100.0,0.0,-100.0);
@@ -103,6 +126,54 @@ void draw_floor () {
 		glVertex3f(0.0,0.0,0.0);
 		glVertex3f(0.0,0.0,-100.0);
 		glVertex3f(100.0,0.0,-100.0);
+		glVertex3f(100.0,0.0,0.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(0.0,0.0,0.0);
+		glVertex3f(0.0,2.0,0.0);
+		glVertex3f(100.0,2.0,0.0);
+		glVertex3f(100.0,0.0,0.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(100.0,0.0,0.0);
+		glVertex3f(100.0,2.0,0.0);
+		glVertex3f(0.0,2.0,0.0);
+		glVertex3f(0.0,0.0,0.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(0.0,0.0,-100.0);
+		glVertex3f(0.0,2.0,-100.0);
+		glVertex3f(100.0,2.0,-100.0);
+		glVertex3f(100.0,0.0,-100.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(100.0,0.0,-100.0);
+		glVertex3f(100.0,2.0,-100.0);
+		glVertex3f(0.0,2.0,-100.0);
+		glVertex3f(0.0,0.0,-100.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(0.0,0.0,0.0);
+		glVertex3f(0.0,2.0,0.0);
+		glVertex3f(0.0,2.0,-100.0);
+		glVertex3f(0.0,0.0,-100.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(0.0,0.0,-100.0);
+		glVertex3f(0.0,2.0,-100.0);
+		glVertex3f(0.0,2.0,0.0);
+		glVertex3f(0.0,0.0,0.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(100.0,0.0,0.0);
+		glVertex3f(100.0,2.0,0.0);
+		glVertex3f(100.0,2.0,-100.0);
+		glVertex3f(100.0,0.0,-100.0);
+	glEnd();
+	glBegin(GL_POLYGON);
+		glVertex3f(100.0,0.0,-100.0);
+		glVertex3f(100.0,2.0,-100.0);
+		glVertex3f(100.0,2.0,0.0);
 		glVertex3f(100.0,0.0,0.0);
 	glEnd();
 	glPopMatrix();
@@ -166,7 +237,7 @@ void draw_game_objects () {
 		
 		// objetos
 		for(i = 0; i < game->niveles->cantidad_objetos; i++) {
-			// if (game->niveles->objetos[i].impactos_restantes > 0) {
+			if (game->niveles->objetos[i].impactos_restantes > 0) {
 				if (game->niveles->objetos[i].tipo == 1) {
 					glPushMatrix();
 					glTranslatef(-50.0f,-45.0f,50.0f);
@@ -195,7 +266,7 @@ void draw_game_objects () {
 					glPopMatrix();
 				}
 				
-			// }
+			}
 		}
 }
 
@@ -212,7 +283,7 @@ void display () {
 	glRotatef(camera_x,1.0,0.0,0.0);
 	glRotatef(camera_y,0.0,1.0,0.0);
 
-	draw_floor();
+	draw_game_area();
 	draw_game_objects();
 	
 	glPushMatrix();
@@ -232,6 +303,7 @@ void display () {
 
 void collision_object (float block_left_bound, float block_right_bound,
 						float block_top_bound, float block_bottom_bound, int &impactos_restantes) {
+							
 	if (ball_x >= block_left_bound - 1	
 		&&	ball_x <= block_right_bound + 1)
 	{
@@ -426,6 +498,7 @@ static void play(int value) {
 		block_bottom_bound = game->niveles->objetos[i].y - 2.5;
 		collision_object(block_left_bound,block_right_bound,
 		 	block_top_bound, block_bottom_bound, game->niveles->objetos[i].impactos_restantes);
+						cout<<game->niveles->objetos[i].impactos_restantes<<endl;
 	}
 
 	
