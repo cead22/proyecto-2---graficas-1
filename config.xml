@@ -109,7 +109,7 @@
 </nivel>
 <nivel>
   <id>
-    2
+    666
   </id>
   <tiempo_juego>
      480
@@ -184,10 +184,10 @@
     <objeto>
       <esfera>
 	<x>
-	  20
+	  30
 	</x>
 	<y>
-	  5
+	  30
 	</y>
 	<radio>
 	  5

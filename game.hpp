@@ -4,6 +4,16 @@ typedef struct {
 } Punto;
 
 typedef struct {
+	int actual;
+	int cantidad;
+	Punto *punto_actual;
+	Punto *punto_proximo;
+	float dx, dy, d;
+	float velocidad_x, velocidad_y;
+	
+} Movimiento;
+
+typedef struct {
 	int velocidad;
 	Punto *puntos;
 } Trayectoria;
@@ -12,6 +22,9 @@ typedef struct {
 	float disparo;
 	int cantidad_puntos;
 	Trayectoria trayectoria;
+	int impactos_restantes;
+	Movimiento movimiento;
+	Punto *posicion;
 } Jugador;
 
 typedef struct {
@@ -25,6 +38,7 @@ typedef struct {
 			char *primitiva;
 		} gl;
 	} obj;
+	int impactos_restantes;
 } Objeto;
 
 typedef struct {
@@ -42,11 +56,3 @@ typedef struct {
 	Nivel *niveles;
 } Game;
 
-typedef struct {
-	int actual;
-	int cantidad;
-	Punto *punto_actual;
-	Punto *punto_proximo;
-	float dx, dy, d;
-	float velocidad_x, velocidad_y;
-} Movimiento;

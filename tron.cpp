@@ -26,49 +26,23 @@ using namespace rapidxml;
 // timer variables
 static int start_time;
 static int previous_time;
-static int timer = 10;
+static int timer = 1;
 
 // ball
-// static float ball_x = 0.0;
-// static float ball_y = 0.0;
+static float ball_x = 80.0;
+static float ball_y = 80.0;
 // static float ball_z = 0.0;
-// 
-// static float ball_speed_x = 5*0.1;
-// static float ball_speed_y = 5*0.2;
+
+static float ball_speed_x = 15*0.0;
+static float ball_speed_y = 15*0.2;
 // static float ball_speed_z = 5*0.15;
-// 
-// static int ball_direction_x = 1;
-// static int ball_direction_y = 1;
-// static int ball_direction_z = 1;
 
-Punto *posicion_jugador = (Punto *) malloc(sizeof(Punto));
-Punto *posicion_contrincantes;
-
-Movimiento *movimiento_jugador;
-Movimiento *movimiento_contrincantes;
-
-// static int puntos_jugador_count = 1;
-// Punto *punto_jugador_actual;
-// Punto *punto_jugador_proximo;
-
-// camera
-// static float camera_rotation_x = 0.0;
-// static float camera_rotation_y = 1.0;
-// static float camera_rotation_z = 0.0;
+static int ball_direction_x = 1;
+static int ball_direction_y = 1;
 
 static float camera_x = 0.0;
 static float camera_y = 0.0;
 
-
-
-// static float rx = 0.0;
-// static float ry = 0.0;
-// static float rz = 0.0;
-// static float ra = 0.0;
-// 
-// static void rotate(float x, float y, float z, float a) {
-// 	glRotatef(x,y,z,a);
-// }
 
 void light_config() { 	
 	GLfloat light_diffuse[] = {.2, .2, .2, 1.0};
@@ -143,79 +117,86 @@ void draw_game_objects () {
 	Objeto *objeto = game->niveles->objetos;
 
 	glPushMatrix();
-		glTranslatef(-50.0f,-50.0f,	50.0f);
-		glColor4f(1.0,0.0,0.0,1.0);
-		glLineWidth(2.0);	
-
-	// contrincantes
-	for(i = 0; i < game->niveles->cantidad_contrincantes; i++, contrincante++) {
-		glBegin(GL_LINE_LOOP);
-			for (j = 0, punto = contrincante->trayectoria.puntos; j < contrincante->cantidad_puntos; punto++, j++)
-				glVertex3f(punto->x,0.0,-punto->y);
-		glEnd();
-	}
+			glTranslatef(-50.0f,-50.0f,	50.0f);
+			glColor4f(1.0,0.0,0.0,1.0);
+			glLineWidth(2.0);	
 	
-	// jugador
-		glBegin(GL_LINE_LOOP);
-			for (j = 0, punto = jugador->trayectoria.puntos; j < jugador->cantidad_puntos; punto++, j++)
-				glVertex3f(punto->x,0.0,-punto->y);
-		glEnd();
+		// contrincantes paths
+		for(i = 0; i < game->niveles->cantidad_contrincantes; i++, contrincante++) {
+			glBegin(GL_LINE_LOOP);
+				for (j = 0, punto = contrincante->trayectoria.puntos; j < contrincante->cantidad_puntos; punto++, j++)
+					glVertex3f(punto->x,0.0,-punto->y);
+			glEnd();
+		}
 		
-	glPopMatrix();
-		
-	// jugador
-	glPushMatrix();
-		glTranslatef(-50.0f,-46.0f,	50.0f);
-		glTranslatef(posicion_jugador->x,0.0,- posicion_jugador->y);
-		glScalef(0.07f,0.07f,0.07f);
-		setup_lighting(1);
-		draw_mesh(1);
-	glPopMatrix();
-	
-	// contrincantes
-	for (k = 0; k < game->niveles->cantidad_contrincantes; k++) {
-		glPushMatrix();
-			glTranslatef(-50.0f,-46.0f,	50.0f);
-			glTranslatef(posicion_contrincantes[k].x,0.0,- posicion_contrincantes[k].y);
-		glScalef(0.07f,0.07f,0.07f);
-			setup_lighting(1);
-			draw_mesh(1);
-		glPopMatrix();
-	}
-	
-	// objetos
-	for(i = 0; i < game->niveles->cantidad_objetos; i++, objeto++) {
-
-			if (objeto->tipo == 1) {
-				glPushMatrix();
-				glTranslatef(-50.0f,-45.0f,50.0f);
-				glTranslatef(objeto->x, 0.0f, - objeto->y);
-				glColor4f(1.0,0.0,0.0,1.0);
-				glPushMatrix();
-					glScalef(10.0f,20.0f,20.0f);
-					setup_lighting(2);
-					draw_mesh(2);
-				glPopMatrix();
-				glPopMatrix();
-			}
-			else {
-
-				glPushMatrix();
-					glTranslatef(-50.0f,-47.5f,50.0f);
-					glTranslatef(objeto->x, 0.0f, - objeto->y);
-					glColor4f(1.0,1.0,0.0,1.0);
-				
-				if (strcmp(objeto->obj.gl.primitiva,"cubo")) {
-					glutSolidCube(objeto->obj.gl.tamano);
-				}
-				else if (strcmp(objeto->obj.gl.primitiva,"esfera")) {
-					glutSolidSphere(objeto->obj.gl.tamano,50,50);
-				}
-				glPopMatrix();
-			}
+		// jugador path
+			glBegin(GL_LINE_LOOP);
+				for (j = 0, punto = jugador->trayectoria.puntos; j < jugador->cantidad_puntos; punto++, j++)
+					glVertex3f(punto->x,0.0,-punto->y);
+			glEnd();
 			
+		glPopMatrix();
+			
+		// jugador
+		if (game->niveles->jugador.impactos_restantes > 0) {
+			// cout << game->niveles->jugador.impactos_restantes << endl;
+			glPushMatrix();
+				glTranslatef(-50.0f,-46.0f,	50.0f);
+				glTranslatef(game->niveles->jugador.posicion->x,0.0,- game->niveles->jugador.posicion->y);
+				glScalef(0.07f,0.07f,0.07f);
+				setup_lighting(1);
+				draw_mesh(1);
+			glPopMatrix();
+		}
 		
-	}
+		// contrincantes
+	
+		for (k = 0; k < game->niveles->cantidad_contrincantes; k++) {
+			// if (game->niveles->contrincantes[k].impactos_restantes > 0) {
+			
+				glPushMatrix();
+					glTranslatef(-50.0f,-46.0f,	50.0f);
+					glTranslatef(game->niveles->contrincantes[k].posicion->x,0.0,- game->niveles->contrincantes[k].posicion->y);
+					glScalef(0.07f,0.07f,0.07f);
+					setup_lighting(1);
+					draw_mesh(1);
+				glPopMatrix();
+			// }
+		}
+		
+		// objetos
+		for(i = 0; i < game->niveles->cantidad_objetos; i++) {
+			// if (game->niveles->objetos[i].impactos_restantes > 0) {
+				if (game->niveles->objetos[i].tipo == 1) {
+					glPushMatrix();
+					glTranslatef(-50.0f,-45.0f,50.0f);
+					glTranslatef(game->niveles->objetos[i].x, 0.0f, - game->niveles->objetos[i].y);
+					glColor4f(1.0,0.0,0.0,1.0);
+					glPushMatrix();
+						glScalef(10.0f,20.0f,20.0f);
+						setup_lighting(2);
+						draw_mesh(2);
+					glPopMatrix();
+					glPopMatrix();
+				}
+				else {
+	
+					glPushMatrix();
+						glTranslatef(-50.0f,-47.5f,50.0f);
+						glTranslatef(game->niveles->objetos[i].x, 0.0f, - game->niveles->objetos[i].y);
+						glColor4f(1.0,1.0,0.0,1.0);
+	
+					if (strcmp(game->niveles->objetos[i].obj.gl.primitiva,"cubo")) {
+						glutSolidCube(game->niveles->objetos[i].obj.gl.tamano);
+					}
+					else if (strcmp(game->niveles->objetos[i].obj.gl.primitiva,"esfera")) {
+						glutSolidSphere(game->niveles->objetos[i].obj.gl.tamano/2,50,50);
+					}
+					glPopMatrix();
+				}
+				
+			// }
+		}
 }
 
 
@@ -234,100 +215,224 @@ void display () {
 	draw_floor();
 	draw_game_objects();
 	
+	glPushMatrix();
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, (float []){1.0,0.0,0.0,1.0});
+		glMaterialfv(GL_FRONT, GL_AMBIENT, (float []){1.0,0.0,0.0,1.0});
+		glColor4f(1.0,0.0,0.0,1.0);
+		glTranslatef(-50.0f,-49.0f,50.0f);
+		glTranslatef(ball_x,0,-ball_y);
+		glutSolidSphere(1.0,20,20);
+	glPopMatrix();
 	
-	glRotatef(0.0,camera_x,camera_y,0.0);
+	
+	// glRotatef(0.0,camera_x,camera_y,0.0);
 	// paint
 	glutSwapBuffers();
+}
+
+void collision_object (float block_left_bound, float block_right_bound,
+						float block_top_bound, float block_bottom_bound, int &impactos_restantes) {
+	if (ball_x >= block_left_bound - 1	
+		&&	ball_x <= block_right_bound + 1)
+	{
+			// top
+			if (abs(ball_y - block_top_bound) < 1 && ball_direction_y < 0) {
+				ball_direction_y = 1;
+				impactos_restantes--;
+			}
+			// bottom
+			if (abs(ball_y - block_bottom_bound) < 1 && ball_direction_y > 0) {
+				ball_direction_y = -1;
+				impactos_restantes--;
+			}
+	}
+	// collision with one of the sides
+	if (ball_y >= block_bottom_bound - 1
+		&&	ball_y <= block_top_bound + 1)
+	{
+		if( abs(ball_x - block_right_bound) < 1 && ball_direction_x < 0) {
+			ball_direction_x *= -1;
+			impactos_restantes--;
+		}
+		if( abs(ball_x - block_left_bound) < 1 && ball_direction_x > 0) {
+			ball_direction_x *= -1;
+			impactos_restantes--;
+		}
+	}
 }
 
 static void play(int value) {
 	int current_time = glutGet(GLUT_ELAPSED_TIME);
 	int time_since_previous_frame = current_time - previous_time;
 	int elapsed_time = current_time - start_time;
+	Punto *temp;
+	float dx1, dy1, d1;
+	float dx2, dy2, d2;
+	int nivel_completado = 1;
 	
 	// Set up the next timer tick (do this first)
     glutTimerFunc(timer, play, 0);
 	
-	Punto *temp = (Punto *) malloc(sizeof(Punto));
-	float dx1, dy1, d1;
-	float dx2, dy2, d2;
-	 
-	temp->x = posicion_jugador->x + movimiento_jugador->velocidad_x * 1;
-	temp->y = posicion_jugador->y + movimiento_jugador->velocidad_y * 1;
-	
-	dx1 = movimiento_jugador->punto_proximo->x - posicion_jugador->x;
-	dy1 = movimiento_jugador->punto_proximo->y - posicion_jugador->y;
-	d1 = dx1*dx1 + dy1*dy1;
-	
-	dx2 = temp->x - posicion_jugador->x;
-	dy2 = temp->y - posicion_jugador->y;
-	d2 = dx2*dx2 + dy2*dy2;
-	 
-	if (d1 >= d2) {
-		posicion_jugador->x = temp->x;
-		posicion_jugador->y = temp->y;
-	} else {
-		
-		movimiento_jugador->punto_actual = movimiento_jugador->punto_proximo;
-		
-		if (movimiento_jugador->actual == movimiento_jugador->cantidad) {
-			movimiento_jugador->punto_proximo = game->niveles->jugador.trayectoria.puntos;
-			movimiento_jugador->actual = 1;
-
-		}
-		else {
-			movimiento_jugador->punto_proximo++;
-			movimiento_jugador->actual++;
-		}
-		movimiento_jugador->dx = movimiento_jugador->punto_proximo->x - movimiento_jugador->punto_actual->x;
-		movimiento_jugador->dy = movimiento_jugador->punto_proximo->y - movimiento_jugador->punto_actual->y;
-		movimiento_jugador->d = sqrt(movimiento_jugador->dx * movimiento_jugador->dx + movimiento_jugador->dy * movimiento_jugador->dy); 
-		movimiento_jugador->velocidad_x = movimiento_jugador->dx / movimiento_jugador->d;
-		movimiento_jugador->velocidad_y = movimiento_jugador->dy / movimiento_jugador->d;
+	// ha perdido
+	if (game->niveles->jugador.impactos_restantes <= 0) {
+		cout << "HA PERDIDO" << endl;
+		exit(0);
 	}
 	
-	free(temp);
+	for (int i = 0; i < game->niveles->cantidad_contrincantes && nivel_completado; i++) {
+		if (game->niveles->contrincantes[i].impactos_restantes > 0) {
+			nivel_completado = 0;
+			break;
+		}
+	}
 	
-	for (int i = 0; i < game->niveles->cantidad_contrincantes; i++) {
+	if (nivel_completado) {
+		cout << "NIVEL PASADO" << endl;
+		if(--game->cantidad_niveles == 0) {
+			// cout<<game->cantidad_niveles<<endl;
+			cout << "HA GANADO" << endl;
+			exit(0);
+		}
+		game->niveles++;
+	}
+	
+	if (game->niveles->jugador.impactos_restantes > 0 ) {
 		temp = (Punto *) malloc(sizeof(Punto));
-		temp->x = posicion_contrincantes[i].x + movimiento_contrincantes[i].velocidad_x * 1;
-		temp->y = posicion_contrincantes[i].y + movimiento_contrincantes[i].velocidad_y * 1;
-
-		dx1 = movimiento_contrincantes[i].punto_proximo->x - posicion_contrincantes[i].x;
-		dy1 = movimiento_contrincantes[i].punto_proximo->y - posicion_contrincantes[i].y;
+	 
+		temp->x = game->niveles->jugador.posicion->x + game->niveles->jugador.movimiento.velocidad_x * 1;
+		temp->y = game->niveles->jugador.posicion->y + game->niveles->jugador.movimiento.velocidad_y * 1;
+	
+		dx1 = game->niveles->jugador.movimiento.punto_proximo->x - game->niveles->jugador.posicion->x;
+		dy1 = game->niveles->jugador.movimiento.punto_proximo->y - game->niveles->jugador.posicion->y;
 		d1 = dx1*dx1 + dy1*dy1;
-
-		dx2 = temp->x - posicion_contrincantes[i].x;
-		dy2 = temp->y - posicion_contrincantes[i].y;
+	
+		dx2 = temp->x - game->niveles->jugador.posicion->x;
+		dy2 = temp->y - game->niveles->jugador.posicion->y;
 		d2 = dx2*dx2 + dy2*dy2;
-
+	 
 		if (d1 >= d2) {
-			posicion_contrincantes[i].x = temp->x;
-			posicion_contrincantes[i].y = temp->y;
+			game->niveles->jugador.posicion->x = temp->x;
+			game->niveles->jugador.posicion->y = temp->y;
 		} else {
-
-			movimiento_contrincantes[i].punto_actual = movimiento_contrincantes[i].punto_proximo;
-
-			if (movimiento_contrincantes[i].actual == movimiento_contrincantes[i].cantidad) {
-				movimiento_contrincantes[i].punto_proximo = game->niveles->contrincantes[i].trayectoria.puntos;
-				movimiento_contrincantes[i].actual = 1;
-
+		
+			game->niveles->jugador.movimiento.punto_actual = game->niveles->jugador.movimiento.punto_proximo;
+		
+			if (game->niveles->jugador.movimiento.actual >= game->niveles->jugador.movimiento.cantidad) {
+				game->niveles->jugador.movimiento.punto_proximo = game->niveles->jugador.trayectoria.puntos;
+				game->niveles->jugador.movimiento.actual = 1;
+	
 			}
 			else {
-				movimiento_contrincantes[i].punto_proximo++;
-				movimiento_contrincantes[i].actual++;
+				game->niveles->jugador.movimiento.punto_proximo++;
+				game->niveles->jugador.movimiento.actual++;
 			}
-			movimiento_contrincantes[i].dx = movimiento_contrincantes[i].punto_proximo->x - movimiento_contrincantes[i].punto_actual->x;
-			movimiento_contrincantes[i].dy = movimiento_contrincantes[i].punto_proximo->y - movimiento_contrincantes[i].punto_actual->y;
-			movimiento_contrincantes[i].d = sqrt(movimiento_contrincantes[i].dx * movimiento_contrincantes[i].dx
-			 	+ movimiento_contrincantes[i].dy * movimiento_contrincantes[i].dy); 
-			movimiento_contrincantes[i].velocidad_x = movimiento_contrincantes[i].dx / movimiento_contrincantes[i].d;
-			movimiento_contrincantes[i].velocidad_y = movimiento_contrincantes[i].dy / movimiento_contrincantes[i].d;
+			game->niveles->jugador.movimiento.dx = game->niveles->jugador.movimiento.punto_proximo->x - game->niveles->jugador.movimiento.punto_actual->x;
+			game->niveles->jugador.movimiento.dy = game->niveles->jugador.movimiento.punto_proximo->y - game->niveles->jugador.movimiento.punto_actual->y;
+			game->niveles->jugador.movimiento.d = sqrt(game->niveles->jugador.movimiento.dx * game->niveles->jugador.movimiento.dx +
+			 	game->niveles->jugador.movimiento.dy * game->niveles->jugador.movimiento.dy); 
+			game->niveles->jugador.movimiento.velocidad_x = game->niveles->jugador.movimiento.dx / game->niveles->jugador.movimiento.d;
+			game->niveles->jugador.movimiento.velocidad_y = game->niveles->jugador.movimiento.dy / game->niveles->jugador.movimiento.d;
 		}
 	
 		free(temp);
 	}
+	else {
+		game->niveles->jugador.posicion->x = -20;
+		game->niveles->jugador.posicion->y = -20;
+	}
+	
+	for (int i = 0; i < game->niveles->cantidad_contrincantes; i++) {
+		if (game->niveles->contrincantes[i].impactos_restantes > 0) {
+				temp = (Punto *) malloc(sizeof(Punto));
+				temp->x = game->niveles->contrincantes[i].posicion->x + game->niveles->contrincantes[i].movimiento.velocidad_x * 1;
+				temp->y = game->niveles->contrincantes[i].posicion->y + game->niveles->contrincantes[i].movimiento.velocidad_y * 1;
+		
+				dx1 = game->niveles->contrincantes[i].movimiento.punto_proximo->x - game->niveles->contrincantes[i].posicion->x;
+				dy1 = game->niveles->contrincantes[i].movimiento.punto_proximo->y - game->niveles->contrincantes[i].posicion->y;
+				d1 = dx1*dx1 + dy1*dy1;
+		
+				dx2 = temp->x - game->niveles->contrincantes[i].posicion->x;
+				dy2 = temp->y - game->niveles->contrincantes[i].posicion->y;
+				d2 = dx2*dx2 + dy2*dy2;
+		
+				if (d1 >= d2) {
+					game->niveles->contrincantes[i].posicion->x = temp->x;
+					game->niveles->contrincantes[i].posicion->y = temp->y;
+				} else {
+		
+					game->niveles->contrincantes[i].movimiento.punto_actual = game->niveles->contrincantes[i].movimiento.punto_proximo;
+		
+					if (game->niveles->contrincantes[i].movimiento.actual >= game->niveles->contrincantes[i].movimiento.cantidad) {
+						game->niveles->contrincantes[i].movimiento.punto_proximo = game->niveles->contrincantes[i].trayectoria.puntos;
+						game->niveles->contrincantes[i].movimiento.actual = 1;
+		
+					}
+					else {
+						game->niveles->contrincantes[i].movimiento.punto_proximo++;
+						game->niveles->contrincantes[i].movimiento.actual++;
+					}
+					game->niveles->contrincantes[i].movimiento.dx = game->niveles->contrincantes[i].movimiento.punto_proximo->x -
+					 	game->niveles->contrincantes[i].movimiento.punto_actual->x;
+					game->niveles->contrincantes[i].movimiento.dy = game->niveles->contrincantes[i].movimiento.punto_proximo->y -
+					 	game->niveles->contrincantes[i].movimiento.punto_actual->y;
+					game->niveles->contrincantes[i].movimiento.d = sqrt(game->niveles->contrincantes[i].movimiento.dx * game->niveles->contrincantes[i].movimiento.dx
+					 	+ game->niveles->contrincantes[i].movimiento.dy * game->niveles->contrincantes[i].movimiento.dy); 
+					game->niveles->contrincantes[i].movimiento.velocidad_x = game->niveles->contrincantes[i].movimiento.dx / game->niveles->contrincantes[i].movimiento.d;
+					game->niveles->contrincantes[i].movimiento.velocidad_y = game->niveles->contrincantes[i].movimiento.dy / game->niveles->contrincantes[i].movimiento.d;
+		
+					free(temp);
+				}
+			}
+			else {
+				game->niveles->contrincantes[i].posicion->x = -10;
+				game->niveles->contrincantes[i].posicion->y = -10 + i*10;
+			}
+	}
 
+	
+	// collision ball-cube
+
+	if (ball_x >= 100.0 || ball_x <= 0.0) {
+	  // printf("collision x\n");
+	  ball_direction_x *= -1;
+	}
+	if (ball_y >= 100.0 || ball_y <= 0.0) {
+	  // printf("collision y\n");
+	  ball_direction_y *= -1;
+	}
+	
+	// colision con jugador
+	float block_left_bound = game->niveles->jugador.posicion->x - 2.5,
+		block_right_bound = game->niveles->jugador.posicion->x + 2.5,
+		block_top_bound = game->niveles->jugador.posicion->y + 2.5,
+		block_bottom_bound = game->niveles->jugador.posicion->y - 2.5;
+	
+	collision_object(block_left_bound,block_right_bound, 
+		block_top_bound, block_bottom_bound, game->niveles->jugador.impactos_restantes);
+
+	for (int i = 0; i < game->niveles->cantidad_contrincantes; i++) {
+		block_left_bound =   game->niveles->contrincantes[i].posicion->x - 2.5;
+		block_right_bound =  game->niveles->contrincantes[i].posicion->x + 2.5;
+		block_top_bound =    game->niveles->contrincantes[i].posicion->y + 2.5;
+		block_bottom_bound = game->niveles->contrincantes[i].posicion->y - 2.5;
+		collision_object(block_left_bound,block_right_bound,
+		 	block_top_bound, block_bottom_bound, game->niveles->contrincantes[i].impactos_restantes);
+	}
+	
+	for (int i = 0; i < game->niveles->cantidad_objetos; i++) {
+		block_left_bound = game->niveles->objetos[i].x - 2.5;
+		block_right_bound = game->niveles->objetos[i].x + 2.5;
+		block_top_bound = game->niveles->objetos[i].y + 2.5;
+		block_bottom_bound = game->niveles->objetos[i].y - 2.5;
+		collision_object(block_left_bound,block_right_bound,
+		 	block_top_bound, block_bottom_bound, game->niveles->objetos[i].impactos_restantes);
+	}
+
+	
+	ball_x += ball_direction_x * ball_speed_x;
+	ball_y += ball_direction_y * ball_speed_y;
+
+	
 	
 	// Force a redisplay to render the new image
 	glutPostRedisplay();
@@ -411,8 +516,6 @@ Game * load_game (char * file) {
 		Punto *punto;
 		Jugador *contrincante;
 		Objeto * objeto;
-		movimiento_contrincantes = (Movimiento *) malloc(sizeof(Movimiento) * g->niveles->cantidad_contrincantes);
-		posicion_contrincantes = (Punto *) malloc(sizeof(Punto) * g->niveles->cantidad_contrincantes);
 
 
 		ifstream archivo(file);
@@ -426,94 +529,122 @@ Game * load_game (char * file) {
 
 	    xml_node<> *nodo = doc.first_node("proyecto");
 
-		g->niveles = (Nivel *) malloc(sizeof(Nivel) * 2);
 		g->cantidad_niveles = atoi(nodo->first_node("niveles")->value());
+		g->niveles = (Nivel *) malloc(sizeof(Nivel) * g->cantidad_niveles) ;
+		
 
 	    nodo = nodo->first_node("nivel");  
 
 	    // nivel
 	    for(int i = 0; i < g->cantidad_niveles ; i++, nodo = nodo->next_sibling("nivel")){
 			// datos nivel
-	        g->niveles->id = (char *) nodo->first_node("id")->value();
-	        g->niveles->tiempo_juego = atoi(nodo->first_node("tiempo_juego")->value());
+	        g->niveles[i].id = (char *) nodo->first_node("id")->value();
+
+	        g->niveles[i].tiempo_juego = atoi(nodo->first_node("tiempo_juego")->value());
 	
 			// datos jugador
-	        g->niveles->jugador.cantidad_puntos = atoi(
+	        g->niveles[i].jugador.cantidad_puntos = atoi(
 				nodo->first_node("jugador")->first_node("trayectoria")->first_node("puntos")->value());
-	        g->niveles->jugador.disparo = atof(
+			g->niveles[i].jugador.impactos_restantes = 3;
+	        g->niveles[i].jugador.disparo = atof(
 				nodo->first_node("jugador")->first_node("disparo")->value());
-	        g->niveles->jugador.trayectoria.velocidad = atof(
+	        g->niveles[i].jugador.trayectoria.velocidad = atof(
 				nodo->first_node("jugador")->first_node("trayectoria")->first_node("velocidad")->value());
 
 	        // trayectoria del jugador
 	        xml_node<> *nodopuntos ; 
 	        nodopuntos = nodo->first_node("jugador")->first_node("trayectoria")->first_node("punto");
-			g->niveles->jugador.trayectoria.puntos = (Punto *) malloc(sizeof(Punto) * 5);
+			g->niveles[i].jugador.trayectoria.puntos = (Punto *) malloc(sizeof(Punto) * g->niveles[i].jugador.cantidad_puntos);
+			g->niveles[i].jugador.posicion = (Punto * ) malloc(sizeof(Punto));
 			
-	        for(int j = 0; j < g->niveles->jugador.cantidad_puntos && nodopuntos ; j++){
-	            g->niveles->jugador.trayectoria.puntos[j].x = atof(nodopuntos->first_node("x")->value());
-	            g->niveles->jugador.trayectoria.puntos[j].y = atof(nodopuntos->first_node("y")->value());
-	            nodopuntos = nodopuntos->next_sibling("punto");
+	        for(int j = 0; j < g->niveles[i].jugador.cantidad_puntos && nodopuntos ; j++){
+	            g->niveles[i].jugador.trayectoria.puntos[j].x = atof(nodopuntos->first_node("x")->value());
+	            g->niveles[i].jugador.trayectoria.puntos[j].y = atof(nodopuntos->first_node("y")->value());
 				if (j == 0) {
-					posicion_jugador->x = g->niveles->jugador.trayectoria.puntos[j].x;
-					posicion_jugador->y = g->niveles->jugador.trayectoria.puntos[j].y;
+					g->niveles[i].jugador.posicion->x = g->niveles[i].jugador.trayectoria.puntos[j].x;
+					g->niveles[i].jugador.posicion->y = g->niveles[i].jugador.trayectoria.puntos[j].y;
 				}
+				nodopuntos = nodopuntos->next_sibling("punto");
 	        }  
 	
-			movimiento_jugador = (Movimiento *) malloc(sizeof(Movimiento));
-			movimiento_jugador->actual = 2;
-			movimiento_jugador->cantidad = g->niveles->jugador.cantidad_puntos;
-			movimiento_jugador->punto_actual = g->niveles->jugador.trayectoria.puntos;
-			movimiento_jugador->punto_proximo = g->niveles->jugador.trayectoria.puntos + 1;
-			movimiento_jugador->dx = movimiento_jugador->punto_proximo->x - movimiento_jugador->punto_actual->x;
-			movimiento_jugador->dy = movimiento_jugador->punto_proximo->y - movimiento_jugador->punto_actual->y;
-			movimiento_jugador->d = sqrt(movimiento_jugador->dx * movimiento_jugador->dx + movimiento_jugador->dy * movimiento_jugador->dy); 
-			movimiento_jugador->velocidad_x = movimiento_jugador->dx / movimiento_jugador->d;
-			movimiento_jugador->velocidad_y = movimiento_jugador->dy / movimiento_jugador->d;
-
+			// g->niveles->jugador.movimiento = (Movimiento *) malloc(sizeof(Movimiento));
+			g->niveles[i].jugador.movimiento.punto_actual = (Punto *) malloc(sizeof(Punto));
+			g->niveles[i].jugador.movimiento.punto_proximo = (Punto *) malloc(sizeof(Punto));
+			
+			
+			g->niveles[i].jugador.movimiento.actual = 2;
+			g->niveles[i].jugador.movimiento.cantidad = g->niveles[i].jugador.cantidad_puntos;
+			g->niveles[i].jugador.movimiento.punto_actual = g->niveles[i].jugador.trayectoria.puntos;
+			if (g->niveles[i].jugador.movimiento.cantidad > 1) {
+				g->niveles[i].jugador.movimiento.punto_proximo = g->niveles[i].jugador.trayectoria.puntos + 1;
+			}
+			else {
+				g->niveles[i].jugador.movimiento.punto_proximo = g->niveles[i].jugador.trayectoria.puntos;
+			}
+			g->niveles[i].jugador.movimiento.dx = g->niveles[i].jugador.movimiento.punto_proximo->x - g->niveles[i].jugador.movimiento.punto_actual->x;
+			g->niveles[i].jugador.movimiento.dy = g->niveles[i].jugador.movimiento.punto_proximo->y - g->niveles[i].jugador.movimiento.punto_actual->y;
+			g->niveles[i].jugador.movimiento.d = sqrt(g->niveles[i].jugador.movimiento.dx * g->niveles[i].jugador.movimiento.dx +
+			 	g->niveles[i].jugador.movimiento.dy * g->niveles[i].jugador.movimiento.dy); 
+			g->niveles[i].jugador.movimiento.velocidad_x = g->niveles[i].jugador.movimiento.dx / g->niveles[i].jugador.movimiento.d;
+			g->niveles[i].jugador.movimiento.velocidad_y = g->niveles[i].jugador.movimiento.dy / g->niveles[i].jugador.movimiento.d;
 
 	        // contrincantes
 	        xml_node<> *nodocon;
 	        nodocon = nodo->first_node("contrincantes");
-			g->niveles->cantidad_contrincantes = atoi(nodocon->value());
+			g->niveles[i].cantidad_contrincantes = atoi(nodocon->value());
+
+
+			// movimiento_contrincantes = (Movimiento *) malloc(sizeof(Movimiento) * g->niveles[i].cantidad_contrincantes);
+			// posicion_contrincantes = (Punto *) malloc(sizeof(Punto) * g->niveles[i].cantidad_contrincantes);
 			
 	        nodocon = nodo->first_node("contrincante");
 
-	        for(int k = 0; k < g->niveles->cantidad_contrincantes ; k ++ , nodocon = nodocon->next_sibling("contrincante")){
-				g->niveles->contrincantes = (Jugador *) malloc(sizeof(Jugador) * 2);
+				g->niveles[i].contrincantes = (Jugador *) malloc(sizeof(Jugador) * g->niveles[i].cantidad_contrincantes);
+	        for (int k = 0; k < g->niveles[i].cantidad_contrincantes ; k ++ , nodocon = nodocon->next_sibling("contrincante")){
 				
-	            g->niveles->contrincantes[k].cantidad_puntos = atoi(
+	            g->niveles[i].contrincantes[k].cantidad_puntos = atoi(
 					nodocon->first_node("trayectoria")->first_node("puntos")->value());
-
-	            g->niveles->contrincantes[k].disparo = atof(nodocon->first_node("disparo")->value());
-	            g->niveles->contrincantes[k].trayectoria.velocidad = atof(
+				g->niveles[i].contrincantes[k].impactos_restantes = 1;
+	            g->niveles[i].contrincantes[k].disparo = atof(nodocon->first_node("disparo")->value());
+	            g->niveles[i].contrincantes[k].trayectoria.velocidad = atof(
 					nodocon->first_node("trayectoria")->first_node("velocidad")->value());
 
 	            nodopuntos = nodocon->first_node("trayectoria")->first_node("punto");
 				
-				g->niveles->contrincantes[k].trayectoria.puntos = (Punto *) malloc(sizeof(Punto) *
-				 	g->niveles->contrincantes[k].cantidad_puntos);
+				g->niveles[i].contrincantes[k].trayectoria.puntos = (Punto *) malloc(sizeof(Punto) *
+				 	g->niveles[i].contrincantes[k].cantidad_puntos);
+				
+				g->niveles[i].contrincantes[k].posicion = (Punto *) malloc(sizeof(Punto));
 	            // trayectoria
-	            for(int l = 0; l < g->niveles->contrincantes[k].cantidad_puntos && nodopuntos ; l++){
-	                g->niveles->contrincantes[k].trayectoria.puntos[l].x = atof(nodopuntos->first_node("x")->value());
-	                g->niveles->contrincantes[k].trayectoria.puntos[l].y = atof(nodopuntos->first_node("y")->value());
+	            for(int l = 0; l < g->niveles[i].contrincantes[k].cantidad_puntos && nodopuntos ; l++){
+
+	                g->niveles[i].contrincantes[k].trayectoria.puntos[l].x = atof(nodopuntos->first_node("x")->value());
+	                g->niveles[i].contrincantes[k].trayectoria.puntos[l].y = atof(nodopuntos->first_node("y")->value());
 					if (l == 0) {
-						posicion_contrincantes[k].x = g->niveles->contrincantes[k].trayectoria.puntos[l].x;
-						posicion_contrincantes[k].y = g->niveles->contrincantes[k].trayectoria.puntos[l].y;;
+						g->niveles[i].contrincantes[k].posicion->x = g->niveles[i].contrincantes[k].trayectoria.puntos[l].x;
+						g->niveles[i].contrincantes[k].posicion->y = g->niveles[i].contrincantes[k].trayectoria.puntos[l].y;;
 					}
 	                nodopuntos = nodopuntos->next_sibling("punto");
 	            }
 	
-				movimiento_contrincantes[k].actual = 2;
-				movimiento_contrincantes[k].cantidad = g->niveles->contrincantes[k].cantidad_puntos;
-				movimiento_contrincantes[k].punto_actual =  g->niveles->contrincantes[k].trayectoria.puntos;
-				movimiento_contrincantes[k].punto_proximo = g->niveles->contrincantes[k].trayectoria.puntos + 1;
-				movimiento_contrincantes[k].dx = movimiento_contrincantes[k].punto_proximo->x - movimiento_contrincantes[k].punto_actual->x;
-				movimiento_contrincantes[k].dy = movimiento_contrincantes[k].punto_proximo->y - movimiento_contrincantes[k].punto_actual->y;
-				movimiento_contrincantes[k].d = sqrt(movimiento_contrincantes[k].dx * movimiento_contrincantes[k].dx + 
-					movimiento_contrincantes[k].dy * movimiento_contrincantes[k].dy); 
-				movimiento_contrincantes[k].velocidad_x = movimiento_contrincantes[k].dx / movimiento_contrincantes[k].d;
-				movimiento_contrincantes[k].velocidad_y = movimiento_contrincantes[k].dy / movimiento_contrincantes[k].d;
+				g->niveles[i].contrincantes[k].movimiento.punto_actual = (Punto *) malloc(sizeof(Punto));
+				g->niveles[i].contrincantes[k].movimiento.punto_proximo = (Punto *) malloc(sizeof(Punto));
+				
+				g->niveles[i].contrincantes[k].movimiento.actual = 2;
+				g->niveles[i].contrincantes[k].movimiento.cantidad = g->niveles[i].contrincantes[k].cantidad_puntos;
+				g->niveles[i].contrincantes[k].movimiento.punto_actual =  g->niveles[i].contrincantes[k].trayectoria.puntos;
+				if (g->niveles[i].contrincantes[k].movimiento.cantidad > 1) {
+					g->niveles[i].contrincantes[k].movimiento.punto_proximo = g->niveles[i].contrincantes[k].trayectoria.puntos + 1;
+				}
+				else {
+					g->niveles[i].contrincantes[k].movimiento.punto_proximo = g->niveles[i].contrincantes[k].trayectoria.puntos;
+				}
+				g->niveles[i].contrincantes[k].movimiento.dx = g->niveles[i].contrincantes[k].movimiento.punto_proximo->x - g->niveles[i].contrincantes[k].movimiento.punto_actual->x;
+				g->niveles[i].contrincantes[k].movimiento.dy = g->niveles[i].contrincantes[k].movimiento.punto_proximo->y - g->niveles[i].contrincantes[k].movimiento.punto_actual->y;
+				g->niveles[i].contrincantes[k].movimiento.d = sqrt(g->niveles[i].contrincantes[k].movimiento.dx * g->niveles[i].contrincantes[k].movimiento.dx + 
+					g->niveles[i].contrincantes[k].movimiento.dy * g->niveles[i].contrincantes[k].movimiento.dy); 
+				g->niveles[i].contrincantes[k].movimiento.velocidad_x = g->niveles[i].contrincantes[k].movimiento.dx / g->niveles[i].contrincantes[k].movimiento.d;
+				g->niveles[i].contrincantes[k].movimiento.velocidad_y = g->niveles[i].contrincantes[k].movimiento.dy / g->niveles[i].contrincantes[k].movimiento.d;
 
 	        }
 
@@ -521,39 +652,39 @@ Game * load_game (char * file) {
 	        xml_node<> *objetos ;
 	        objetos = nodo->first_node("objetos");
 			
-			g->niveles->cantidad_objetos = atoi(objetos->first_node("cantidad")->value());
-			g->niveles->objetos = (Objeto *) malloc(sizeof(Objeto) * g->niveles->cantidad_objetos);
+			g->niveles[i].cantidad_objetos = atoi(objetos->first_node("cantidad")->value());
+			g->niveles[i].objetos = (Objeto *) malloc(sizeof(Objeto) * g->niveles[i].cantidad_objetos);
 
 	        objetos = objetos->first_node("objeto");
 
-	        for(int j = 0; j < g->niveles->cantidad_objetos ; j++ , objetos = objetos->next_sibling("objeto")){
+	        for(int j = 0; j < g->niveles[i].cantidad_objetos ; j++ , objetos = objetos->next_sibling("objeto")){
 
 	            string tipo = objetos->first_node()->name();
-
+			cout<<tipo<<endl;
 	            if (!tipo.compare("maya")) {
-					g->niveles->objetos[j].tipo = 1;
-					g->niveles->objetos[j].x = atof(objetos->first_node()->first_node("x")->value());
-					g->niveles->objetos[j].y = atof(objetos->first_node()->first_node("y")->value());
+					g->niveles[i].objetos[j].tipo = 1;
+					g->niveles[i].objetos[j].x = atof(objetos->first_node()->first_node("x")->value());
+					g->niveles[i].objetos[j].y = atof(objetos->first_node()->first_node("y")->value());
 	            } 
 				else if (!tipo.compare("cubo")) {
-					g->niveles->objetos[j].tipo = 2;
-					g->niveles->objetos[j].x = atof(objetos->first_node()->first_node("x")->value()); 
-					g->niveles->objetos[j].y = atof(objetos->first_node()->first_node("y")->value());
-					g->niveles->objetos[j].obj.gl.tamano = 5;
-					g->niveles->objetos[j].obj.gl.primitiva = (char *) malloc(sizeof("cubo"));
-					g->niveles->objetos[j].obj.gl.primitiva = (char *) "cubo";
+					g->niveles[i].objetos[j].tipo = 2;
+					g->niveles[i].objetos[j].x = atof(objetos->first_node()->first_node("x")->value()); 
+					g->niveles[i].objetos[j].y = atof(objetos->first_node()->first_node("y")->value());
+					g->niveles[i].objetos[j].obj.gl.tamano = 5;
+					g->niveles[i].objetos[j].obj.gl.primitiva = (char *) malloc(sizeof("cubo"));
+					g->niveles[i].objetos[j].obj.gl.primitiva = (char *) "cubo";
 	            }
 				else {
-					g->niveles->objetos[j].tipo = 2;
-					g->niveles->objetos[j].x = atof(objetos->first_node()->first_node("x")->value()); 
-					g->niveles->objetos[j].y = atof(objetos->first_node()->first_node("y")->value());
-					g->niveles->objetos[j].obj.gl.tamano = 5;
-					g->niveles->objetos[j].obj.gl.primitiva = (char *) malloc(sizeof("esfera"));
-					g->niveles->objetos[j].obj.gl.primitiva = (char *) "esfera";
+					g->niveles[i].objetos[j].tipo = 2;
+					g->niveles[i].objetos[j].x = atof(objetos->first_node()->first_node("x")->value()); 
+					g->niveles[i].objetos[j].y = atof(objetos->first_node()->first_node("y")->value());
+					g->niveles[i].objetos[j].obj.gl.tamano = 5;
+					g->niveles[i].objetos[j].obj.gl.primitiva = (char *) malloc(sizeof("esfera"));
+					g->niveles[i].objetos[j].obj.gl.primitiva = (char *) "esfera";
 	          	}
+				g->niveles[i].objetos[j].impactos_restantes = 5;
 			}
 	    }
-	
 	return g;
 }
 
@@ -585,6 +716,10 @@ int main (int argc, char *argv[]) {
 	
 	// traverse_xml("config.xml");
 	game = load_game(argv[1]);
+	// game->niveles++;
+	
+	// cout << game->niveles->id << endl;
+	// exit(0);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

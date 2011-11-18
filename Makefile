@@ -2,7 +2,7 @@ UNAME := $(shell uname -s)
 INCLUDES = -Itrimesh/include
 LIBDIR = -Ltrimesh/lib.$(UNAME)
 CC=g++
-CFLAGS=-lGL -lglut -lGLU -ltrimesh
+CFLAGS=-g -lGL -lglut -lGLU -ltrimesh
 ifeq ($(UNAME),Darwin)
 	CFLAGS=-framework GLUT -framework OpenGL -ltrimesh
 endif
